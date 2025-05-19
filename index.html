@@ -2,13 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Valid EID Generator</title>
+  <title>EID Generator</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico"> <!-- Favicon -->
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f0f4f8;
-      padding: 40px;
       margin: 0;
+      padding: 0 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 0;
+    }
+
+    header img {
+      height: 40px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #222;
     }
 
     h2, h3 {
@@ -29,6 +46,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .eid-text {
@@ -93,20 +116,50 @@
       font-size: 14px;
       color: #888;
     }
+
+    .toast {
+      visibility: hidden;
+      min-width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
+
+  <header>
+    <img src="images/logo.png" alt="Logo"> <!-- Replace with your logo -->
+    <h1>EID Generator</h1>
+  </header>
+
   <h2>Valid EIDs</h2>
   <div id="eid-container"></div>
   <button class="generate-btn" onclick="generateEIDs()">Generate Random Set</button>
 
   <!-- CSV Export Section -->
-  <div class="csv-section">
+  <div class="csv-section" id="csv-section">
     <h3>Download EIDs as CSV</h3>
     <label for="eid-count">Number of EIDs:</label>
     <input type="number" id="eid-count" min="1" max="1000" value="5">
     <button class="download-btn" onclick="downloadCSV()">Download CSV</button>
   </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
 
   <footer>&copy; KANILA ADL</footer>
 
@@ -120,11 +173,20 @@
       "02638730574943647539106840709931"
     ];
 
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.className = "toast show";
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 2000);
+    }
+
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(() => {
-        alert(`Copied EID: ${text}`);
+        showToast("Copied EID: " + text);
       }, () => {
-        alert('Failed to copy!');
+        showToast("Copy failed!");
       });
     }
 
@@ -151,12 +213,15 @@
         div.appendChild(copyBtn);
         container.appendChild(div);
       });
+
+      // Optional: scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function downloadCSV() {
       const count = parseInt(document.getElementById("eid-count").value, 10);
       if (isNaN(count) || count < 1) {
-        alert("Please enter a valid number of EIDs to generate.");
+        showToast("Please enter a valid number");
         return;
       }
 
