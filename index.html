@@ -164,86 +164,90 @@
   <footer>&copy; KANILA ADL</footer>
 
   <script>
-    const eids = [
-      "44063935045916589556173899090146",
-      "25066817256318347485949426139283",
-      "68829935261168189473736196278264",
-      "19064878758527210721135135530873",
-      "52090912590191426742879171604349",
-      "02638730574943647539106840709931"
-    ];
+  const generatedSet = new Set();
 
-    function showToast(message) {
-      const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.className = "toast show";
-      setTimeout(() => {
-        toast.className = "toast";
-      }, 2000);
-    }
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = "toast show";
+    setTimeout(() => {
+      toast.className = "toast";
+    }, 2000);
+  }
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast("Copied EID: " + text);
-      }, () => {
-        showToast("Copy failed!");
-      });
-    }
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("Copied EID: " + text);
+    }, () => {
+      showToast("Copy failed!");
+    });
+  }
 
-    function generateEIDs() {
-      const container = document.getElementById("eid-container");
-      container.innerHTML = "";
-
-      const shuffled = eids.sort(() => 0.5 - Math.random()).slice(0, 3);
-
-      shuffled.forEach(eid => {
-        const div = document.createElement("div");
-        div.className = "eid-box";
-
-        const eidText = document.createElement("div");
-        eidText.className = "eid-text";
-        eidText.textContent = eid;
-
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "copy-btn";
-        copyBtn.textContent = "Copy";
-        copyBtn.onclick = () => copyToClipboard(eid);
-
-        div.appendChild(eidText);
-        div.appendChild(copyBtn);
-        container.appendChild(div);
-      });
-
-      // Optional: scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function downloadCSV() {
-      const count = parseInt(document.getElementById("eid-count").value, 10);
-      if (isNaN(count) || count < 1) {
-        showToast("Please enter a valid number");
-        return;
+  function generateValidEID() {
+    let eid;
+    do {
+      eid = "";
+      for (let i = 0; i < 32; i++) {
+        eid += Math.floor(Math.random() * 10);
       }
+    } while ((BigInt(eid) % 97n !== 1n) || generatedSet.has(eid));
+    generatedSet.add(eid);
+    return eid;
+  }
 
-      let csvContent = "EID\n";
-      for (let i = 0; i < count; i++) {
-        const eid = eids[Math.floor(Math.random() * eids.length)];
-        csvContent += `${eid}\n`;
-      }
+  function generateEIDs() {
+    const container = document.getElementById("eid-container");
+    container.innerHTML = "";
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "valid_eids.csv");
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    for (let i = 0; i < 3; i++) {
+      const eid = generateValidEID();
+
+      const div = document.createElement("div");
+      div.className = "eid-box";
+
+      const eidText = document.createElement("div");
+      eidText.className = "eid-text";
+      eidText.textContent = eid;
+
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "copy-btn";
+      copyBtn.textContent = "Copy";
+      copyBtn.onclick = () => copyToClipboard(eid);
+
+      div.appendChild(eidText);
+      div.appendChild(copyBtn);
+      container.appendChild(div);
     }
 
-    // Initial render
-    generateEIDs();
-  </script>
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function downloadCSV() {
+    const count = parseInt(document.getElementById("eid-count").value, 10);
+    if (isNaN(count) || count < 1) {
+      showToast("Please enter a valid number");
+      return;
+    }
+
+    let csvContent = "EID\n";
+    for (let i = 0; i < count; i++) {
+      const eid = generateValidEID();
+      csvContent += `${eid}\n`;
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "valid_eids.csv");
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Initial render
+  generateEIDs();
+</script>
 </body>
 </html>
