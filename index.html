@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Valid EID Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      padding: 40px;
+      margin: 0;
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    #eid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .eid-box {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .eid-text {
+      font-family: monospace;
+      font-size: 16px;
+      color: #222;
+    }
+
+    .copy-btn, .generate-btn, .download-btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .copy-btn {
+      background-color: #007bff;
+    }
+
+    .copy-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .generate-btn {
+      margin-top: 20px;
+      background-color: #28a745;
+    }
+
+    .generate-btn:hover {
+      background-color: #218838;
+    }
+
+    .csv-section {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .download-btn {
+      background-color: #ff9900;
+      margin-left: 10px;
+    }
+
+    .download-btn:hover {
+      background-color: #cc7a00;
+    }
+
+    input[type="number"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 80px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <h2>Valid EIDs</h2>
+  <div id="eid-container"></div>
+  <button class="generate-btn" onclick="generateEIDs()">Generate Random Set</button>
+
+  <!-- CSV Export Section -->
+  <div class="csv-section">
+    <h3>Download EIDs as CSV</h3>
+    <label for="eid-count">Number of EIDs:</label>
+    <input type="number" id="eid-count" min="1" max="1000" value="5">
+    <button class="download-btn" onclick="downloadCSV()">Download CSV</button>
+  </div>
+
+  <footer>&copy; KANILA ADL</footer>
+
+  <script>
+    const eids = [
+      "44063935045916589556173899090146",
+      "25066817256318347485949426139283",
+      "68829935261168189473736196278264",
+      "19064878758527210721135135530873",
+      "52090912590191426742879171604349",
+      "02638730574943647539106840709931"
+    ];
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(`Copied EID: ${text}`);
+      }, () => {
+        alert('Failed to copy!');
+      });
+    }
+
+    function generateEIDs() {
+      const container = document.getElementById("eid-container");
+      container.innerHTML = "";
+
+      const shuffled = eids.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+      shuffled.forEach(eid => {
+        const div = document.createElement("div");
+        div.className = "eid-box";
+
+        const eidText = document.createElement("div");
+        eidText.className = "eid-text";
+        eidText.textContent = eid;
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "copy-btn";
+        copyBtn.textContent = "Copy";
+        copyBtn.onclick = () => copyToClipboard(eid);
+
+        div.appendChild(eidText);
+        div.appendChild(copyBtn);
+        container.appendChild(div);
+      });
+    }
+
+    function downloadCSV() {
+      const count = parseInt(document.getElementById("eid-count").value, 10);
+      if (isNaN(count) || count < 1) {
+        alert("Please enter a valid number of EIDs to generate.");
+        return;
+      }
+
+      let csvContent = "EID\n";
+      for (let i = 0; i < count; i++) {
+        const eid = eids[Math.floor(Math.random() * eids.length)];
+        csvContent += `${eid}\n`;
+      }
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "valid_eids.csv");
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initial render
+    generateEIDs();
+  </script>
+</body>
+</html>
